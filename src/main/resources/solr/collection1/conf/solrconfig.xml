@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<config>
+    <luceneMatchVersion>LUCENE_CURRENT</luceneMatchVersion>
+    <abortOnConfigurationError>true</abortOnConfigurationError>
+    <jmx/>
+    <dataDir>flex</dataDir>
+
+    <updateHandler class="solr.DirectUpdateHandler2">
+        <maxPendingDeletes>100000</maxPendingDeletes>
+    </updateHandler>
+
+    <query>
+        <maxBooleanClauses>1024</maxBooleanClauses>
+
+        <filterCache
+                class="solr.FastLRUCache"
+                size="512"
+                initialSize="512"
+                autowarmCount="256"/>
+
+        <queryResultCache
+                class="solr.FastLRUCache"
+                size="512"
+                initialSize="512"
+                autowarmCount="256"/>
+
+        <documentCache
+                class="solr.FastLRUCache"
+                size="512"
+                initialSize="512"
+                autowarmCount="0"/>
+
+        <enableLazyFieldLoading>true</enableLazyFieldLoading>
+        <queryResultWindowSize>10</queryResultWindowSize>
+        <queryResultMaxDocsCached>200</queryResultMaxDocsCached>
+        <HashDocSet maxSize="3000" loadFactor="0.75"/>
+        <useColdSearcher>false</useColdSearcher>
+        <maxWarmingSearchers>4</maxWarmingSearchers>
+    </query>
+
+    <requestDispatcher handleSelect="true">
+        <requestParsers enableRemoteStreaming="false" multipartUploadLimitInKB="2048"/>
+
+        <httpCaching lastModifiedFrom="openTime"
+                     etagSeed="Solr">
+        </httpCaching>
+    </requestDispatcher>
+
+    <requestHandler name="standard" class="solr.SearchHandler">
+        <!-- default values for query parameters -->
+        <lst name="defaults">
+            <str name="echoParams">explicit</str>
+        </lst>
+    </requestHandler>
+
+    <requestHandler name="/replication" class="solr.ReplicationHandler">
+        <lst name="master">
+            <str name="replicateAfter">optimize</str>
+            <str name="enable">false</str>
+        </lst>
+        <lst name="slave">
+            <str name="masterUrl"></str>
+            <str name="enable">false</str>
+        </lst>
+    </requestHandler>
+
+    <queryConverter name="queryConverter" class="org.apache.solr.spelling.SpellingQueryConverter"/>
+    <requestHandler name="/update" class="solr.XmlUpdateRequestHandler"/>
+    <requestHandler name="/admin/" class="org.apache.solr.handler.admin.AdminHandlers"/>
+
+    <admin>
+        <defaultQuery>solr</defaultQuery>
+    </admin>
+
+    <highlighting>
+        <fragmenter name="gap" class="org.apache.solr.highlight.GapFragmenter">
+            <lst name="defaults">
+                <int name="hl.fragsize">100</int>
+            </lst>
+        </fragmenter>
+
+        <fragmenter name="regex" class="org.apache.solr.highlight.RegexFragmenter" default="true">
+            <lst name="defaults">
+                <int name="hl.fragsize">75</int>
+                <float name="hl.regex.slop">0.5</float>
+                <str name="hl.regex.pattern">[-\w ,/\n\"']{20,200}</str>
+            </lst>
+        </fragmenter>
+
+        <formatter name="html" class="org.apache.solr.highlight.HtmlFormatter" default="true">
+            <lst name="defaults">
+                <str name="hl.simple.pre"><![CDATA[<strong class="keywordHighlight">]]></str>
+                <str name="hl.simple.post"><![CDATA[</strong>]]></str>
+            </lst>
+        </formatter>
+    </highlighting>
+</config>
